@@ -68,7 +68,7 @@ def UserCheck(variable,lenght,type,format):
     CheckLenght(variable)
     var1 = variable.strip("-")
 #
-def Shifts(dataframe,type=shift,morning='06:00',afternoon='14:00',night='22:00',time_period=8):
+def Shifts(dataframe,shift='Morning',morning='06:00',afternoon='14:00',night='22:00',time_period=8):
     '''
     Function takes pandas DataFrame with DatetimeIndex and
     return DataFrame that has only Selected Shifts for each day.
@@ -77,6 +77,7 @@ def Shifts(dataframe,type=shift,morning='06:00',afternoon='14:00',night='22:00',
             morning - start of Morning Shifts and end of Night shift
             afternoon - start of Afternoon shifts and end of Morning shift
             night - start of Night shifts and end of Afternoon shift
+            time_period - T.B.D
     :return Data - dataframe with certain periods of day.
     '''
     try:
@@ -90,7 +91,7 @@ def Shifts(dataframe,type=shift,morning='06:00',afternoon='14:00',night='22:00',
             if shift == 'Night':
                 Data = dataframe.between_tim(night,morning)
                 return Data
-        else
+        else:
             ValueError("Input value is not DataFrame or DataFrame with wrong index")
     except (ValueError,AttributeError) as e:
         return e
@@ -109,6 +110,7 @@ while True:
         IsEmpty(EndTime)
     except (ValueError,AttributeError) as e:
         print (e)
+        time.sleep(1)
         continue
     try:
         Start = datetime.datetime.strptime(StartDate+" "+StartTime,'%Y-%m-%d %H:%M:%S')
@@ -129,6 +131,8 @@ while True:
     #
     Status = Omron.Status.unique()                                          #Get all unique values
     Omron = Omron[Start:End]
+    Omron = Shifts(Omron,shift='Morning')
+    #print(Omron)     #Debug only
     Muda = ["Waiting","Checking custom inputs"]
     Move = ["Going to "]
     Error = ["Failed "]
@@ -143,7 +147,8 @@ while True:
     print ("Marshaling is", SumOfSeries(df_Muda.Duration))
     print ("Move is",SumOfSeries(df_Move.Duration))
     print ("Error is",SumOfSeries(df_Muda.Duration))
-    print ("Parking and docking is",SumOfSeries(df_Park.Duration))
+    print ("Parking is",SumOfSeries(df_Park.Duration))
     print ("Docking is",SumOfSeries(df_Dock.Duration))
     print ("Total working time",SumOfSeries(Omron.Duration))
+    print (df_Move)     #For debug only
 #
