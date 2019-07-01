@@ -1,9 +1,9 @@
 ##########################################################
-######Omron mobile robot - Status Logger viewer 0.01##############
+######Omron mobile robot - Status Logger viewer 0.02##############
 ######Created by ALPS Electric Czech, David Gencansky#####
 ##########################################################
 import pandas as pd
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import datetime
 import time
 #Variable declarations
@@ -31,10 +31,10 @@ def CheckLenght(value,Len=10):
     if isinstance(value,str):
         if len(value) < Len:
             raise AttributeError("Given string is shorter!")
-        else:
+        if len(value) > Len:
             raise AttributeError("Given string is longer!")
-    elif len(value) == Len:
-        return True
+        if len(value) == Len:
+            return True
     else:
         raise ValueError ("Given variable is not type string!")
 def IsEmpty(value,error = True):
@@ -68,14 +68,41 @@ def UserCheck(variable,lenght,type,format):
     CheckLenght(variable)
     var1 = variable.strip("-")
 #
+def Shifts(dataframe,type=shift,morning='06:00',afternoon='14:00',night='22:00',time_period=8):
+    '''
+    Function takes pandas DataFrame with DatetimeIndex and
+    return DataFrame that has only Selected Shifts for each day.
+    :param dataframe - pandas dataframe with DatetimeIndex
+            type - shift, such as Morning,Afternoon or Night
+            morning - start of Morning Shifts and end of Night shift
+            afternoon - start of Afternoon shifts and end of Morning shift
+            night - start of Night shifts and end of Afternoon shift
+    :return Data - dataframe with certain periods of day.
+    '''
+    try:
+        if isinstance(dataframe,pd.DataFrame) and isinstance(dataframe.index,pd.DatetimeIndex):
+            if shift == 'Morning':
+                Data = dataframe.between_time(morning,afternoon)
+                return Data
+            if shift == 'Afternoon':
+                Data = dataframe.between_time(afternoon,night)
+                return Data
+            if shift == 'Night':
+                Data = dataframe.between_tim(night,morning)
+                return Data
+        else
+            ValueError("Input value is not DataFrame or DataFrame with wrong index")
+    except (ValueError,AttributeError) as e:
+        return e
+#
 while True:
     try:
         StartDate = input("Write start date in format YYYY-MM-DD  ")
         IsEmpty(StartDate)
-        CheckLenght(StartDate,Len=10)
+        #CheckLenght(StartDate,Len=10)
         StartTime = input("Write start time in format HH:MM:SS  ")
         IsEmpty(StartTime)
-        CheckLenght(StartDate, Len=8)
+        #CheckLenght(StartDate, Len=8)
         EndDate = input("Write end date in format YYYY-MM-DD  ")
         IsEmpty(EndDate)
         EndTime = input("Write end time in format HH:MM:SS  ")
