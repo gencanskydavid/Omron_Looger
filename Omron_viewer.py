@@ -16,13 +16,14 @@ EndTime = "22:00:00"  #Start time in format HH:MM:SS
 #Function definitions
 def SumOfSeries(dataseries, UpperIndex=100, LowerIndex=1):
     """
-    :param dataframe:
+    :param dataseries: Input dataseries that will be counted
     :param UpperIndex:
     :param LowerIndex:
     :return:
     """
     dataseries = pd.to_timedelta(dataseries)
     Total = datetime.timedelta(0)
+    #InSec = dataseries.total_seconds()
     for rows in dataseries:  # [LowerIndex:UpperIndex]:
         Total = Total + rows
     else:
@@ -63,10 +64,30 @@ def IsEmpty(value,error = True):
             return False
     else:
         AttributeError("Wrong format of input Data!")
-def UserCheck(variable,lenght,type,format):
-    IsEmpty(variable)
-    CheckLenght(variable)
-    var1 = variable.strip("-")
+#
+def CheckDate(date,format='%Y-%m-%d'):
+    '''
+    Function for check user date input validity.
+    return None
+    :param date: date string.
+            format: desired time format.
+    '''
+    try:
+        datetime.datetime.strptime(date,format)
+    except ValueError as e:
+        print(e)
+#
+def CheckTime(time,format='%H:%M:%S'):
+    '''
+    Function for check user time format validity.
+    return None
+    :param time: time string.
+            format: desired time format.
+    '''
+    try:
+        datetime.datetime.strptime(time,format)
+    except ValueError as e:
+        print(e)
 #
 def Shifts(dataframe,shift='Morning',morning='06:00',afternoon='14:00',night='22:00',time_period=8):
     '''
@@ -99,15 +120,13 @@ def Shifts(dataframe,shift='Morning',morning='06:00',afternoon='14:00',night='22
 while True:
     try:
         StartDate = input("Write start date in format YYYY-MM-DD  ")
-        IsEmpty(StartDate)
-        #CheckLenght(StartDate,Len=10)
+        CheckDate(StartDate)
         StartTime = input("Write start time in format HH:MM:SS  ")
-        IsEmpty(StartTime)
-        #CheckLenght(StartDate, Len=8)
+        CheckTime(StartTime)
         EndDate = input("Write end date in format YYYY-MM-DD  ")
-        IsEmpty(EndDate)
+        CheckDate(EndDate)
         EndTime = input("Write end time in format HH:MM:SS  ")
-        IsEmpty(EndTime)
+        CheckTime(EndTime)
     except (ValueError,AttributeError) as e:
         print (e)
         time.sleep(1)
@@ -130,9 +149,8 @@ while True:
         time.sleep(5)
     #
     Status = Omron.Status.unique()                                          #Get all unique values
-    Omron = Omron[Start:End]
+    Omron = Omron[Start:End]                                                #Slice DataFrame for interesting time period
     Omron = Shifts(Omron,shift='Morning')
-    #print(Omron)     #Debug only
     Muda = ["Waiting","Checking custom inputs"]
     Move = ["Going to "]
     Error = ["Failed "]
@@ -150,5 +168,4 @@ while True:
     print ("Parking is",SumOfSeries(df_Park.Duration))
     print ("Docking is",SumOfSeries(df_Dock.Duration))
     print ("Total working time",SumOfSeries(Omron.Duration))
-    print (df_Move)     #For debug only
 #
